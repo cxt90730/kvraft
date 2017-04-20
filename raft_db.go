@@ -24,20 +24,20 @@ func (rdb *RaftDB) NewRaftDB() error {
 	if err != nil {
 		return err
 	}
-    err = rdb.createBucket(STABLE_STORE_BUCKET)
-    if err != nil {
-        return err
-    }
-    err = rdb.createBucket(STABLE_STORE_UINT64_BUCKET)
-    if err != nil {
-        return err
-    }
-    if len(serverConfig.BucketName) != 0  {
-        err = rdb.createBucket([]byte(serverConfig.BucketName))
-        if err != nil {
-            return err
-        }
-    }
+	err = rdb.createBucket(STABLE_STORE_BUCKET)
+	if err != nil {
+		return err
+	}
+	err = rdb.createBucket(STABLE_STORE_UINT64_BUCKET)
+	if err != nil {
+		return err
+	}
+	if len(serverConfig.BucketName) != 0 {
+		err = rdb.createBucket([]byte(serverConfig.BucketName))
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

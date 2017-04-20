@@ -6,19 +6,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/raft"
 	"os"
+	"strings"
 	"sync"
 	"time"
-    "strings"
 )
 
 const (
-	DEFAULT_LOG_DIR   = "./log/"
-	ACCESS_LOG_NAME   = "access.log"
-	ERROR_LOG_NAME    = "error.log"
-	SERVER_LOG_NAME   = "kvraft.log"
-    DEFAULT_PEER_STORAGE_PATH = "peer.json"
-	DEFAULT_DB_PATH   = "kv_raft.db"
-	DEFAULT_CONF_PATH = "./conf/kvraft.conf"
+	DEFAULT_LOG_DIR           = "./log/"
+	ACCESS_LOG_NAME           = "access.log"
+	ERROR_LOG_NAME            = "error.log"
+	SERVER_LOG_NAME           = "kvraft.log"
+	DEFAULT_PEER_STORAGE_PATH = "peer.json"
+	DEFAULT_DB_PATH           = "kv_raft.db"
+	DEFAULT_CONF_PATH         = "./conf/kvraft.conf"
 )
 
 func main() {
@@ -50,41 +50,41 @@ func main() {
 	} else {
 		dbPath = config.DbPath
 	}
-    if config.PeerStorage == "" {
-        peerStoragePath = DEFAULT_PEER_STORAGE_PATH
-    } else {
-        peerStoragePath = config.PeerStorage
-    }
+	if config.PeerStorage == "" {
+		peerStoragePath = DEFAULT_PEER_STORAGE_PATH
+	} else {
+		peerStoragePath = config.PeerStorage
+	}
 
 	err = os.MkdirAll(logDir, 0755)
 	if err != nil {
 		panic(err)
 	}
 
-    if !strings.HasSuffix(logDir, "/") {
-        logDir = logDir + "/"
-    }
+	if !strings.HasSuffix(logDir, "/") {
+		logDir = logDir + "/"
+	}
 	serverLogFile, err := os.OpenFile(logDir+SERVER_LOG_NAME, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic("Failed to open log file " + logDir + SERVER_LOG_NAME + ":" + err.Error())
-        return
+		return
 	}
 	defer serverLogFile.Close()
 
 	// 建立 AccessLogger
 	accessLogFile, err := os.OpenFile(logDir+ACCESS_LOG_NAME, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-        panic("Failed to open log file " + logDir + ACCESS_LOG_NAME + ":" + err.Error())
-        return
-    }
+		panic("Failed to open log file " + logDir + ACCESS_LOG_NAME + ":" + err.Error())
+		return
+	}
 	defer accessLogFile.Close()
 
 	// 建立 ErrorLogger
 	errorLogFile, err := os.OpenFile(logDir+ERROR_LOG_NAME, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-        panic("Failed to open log file " + logDir + ERROR_LOG_NAME + ":" + err.Error())
-        return
-    }
+		panic("Failed to open log file " + logDir + ERROR_LOG_NAME + ":" + err.Error())
+		return
+	}
 	defer errorLogFile.Close()
 
 	ServerLogger := InitServerLog(serverLogFile, "[kvraft]")
@@ -138,21 +138,21 @@ func main() {
 	}
 
 	//Set Peer
-    err = os.MkdirAll(peerStoragePath, 0755)
-    if err != nil {
-        panic(err)
-    }
+	err = os.MkdirAll(peerStoragePath, 0755)
+	if err != nil {
+		panic(err)
+	}
 
 	peerStorage := raft.NewJSONPeers(peerStoragePath, trans)
 	ps, err := peerStorage.Peers()
-	if len(ps) <= 1 && config.EnableSingleNode{
+	if len(ps) <= 1 && config.EnableSingleNode {
 		rc.EnableSingleNode = true
 		rc.DisableBootstrapAfterElect = false
 	}
 	peerStorage.SetPeers(config.Peers)
 
-    ps, _ = peerStorage.Peers()
-    fmt.Println(ps)
+	ps, _ = peerStorage.Peers()
+	fmt.Println(ps)
 	ServerLogger.Println("waiting leader!")
 	r, err := raft.NewRaft(rc, raftFSM, rStorage, rStorage, snap, peerStorage, trans)
 	if err != nil {

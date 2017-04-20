@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
+	"hash/fnv"
 	"strings"
-    "fmt"
 )
 
 // itob returns an 8-byte big endian representation of v.
@@ -21,7 +22,13 @@ func SplitString(str, flag string) []string {
 	strs := strings.Split(str, flag)
 	for i := 0; i < len(strs); i++ {
 		strs[i] = strings.TrimSpace(strs[i])
-        fmt.Println("peer:"+strs[i])
+		fmt.Println("peer:" + strs[i])
 	}
 	return strs
+}
+
+func hash(data []byte) uint64 {
+	h := fnv.New64()
+	h.Write(data)
+	return h.Sum64()
 }

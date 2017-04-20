@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/boltdb/bolt"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
@@ -9,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -137,13 +139,38 @@ func GetHandler(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, string(value))
 }
 
+func GetPeerWithHashHandler(ctx *gin.Context) {
+	data := ctx.Param("data")
+	ipPort, err := getPeerWithHash([]byte(data))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, "err:"+err.Error())
+		return
+	}
+	ip := strings.Split(ipPort, ":")[0]
+	ctx.JSON(http.StatusOK, ip)
+}
+
+func getPeerWithHash(data []byte) (string, error) {
+	peers, err := localServer.PeerStorage.Peers()
+	localServer.Raft.Leader()
+	if err != nil {
+		return "", err
+	}
+	count := len(peers)
+	if count == 0 {
+		return "", fmt.Errorf("No peer in raft")
+	}
+	index := hash(data) % count
+	return peers[index], nil
+}
+
 func (server *KVRaftServer) Start() error {
 	ServerLogger = server.Log
 	localServer = server
 
 	server.Router.PUT("/api/:bucket/:key", SetHandler)
 	server.Router.GET("/api/:bucket/:key", GetHandler)
-	//server.Router.DELETE("/api/:bucket/:key", GetHandler)
+	server.Router.GET("/peer/get/:data", GetPeerWithHashHandler)
 	endless.ListenAndServe(":"+server.Config.ServerPort, server.Router)
 
 	return nil

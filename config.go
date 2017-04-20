@@ -21,7 +21,7 @@ type ServerConfig struct {
 	DbPath           string
 	LogDir           string
 	EnableSingleNode bool
-    BucketName       string
+	BucketName       string
 }
 
 func (sc *ServerConfig) RaftAddrString() string {

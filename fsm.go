@@ -58,17 +58,17 @@ func (fsm *RaftFSM) Apply(log *raft.Log) interface{} {
 	return err
 }
 
-type RaftFSMSnapshot struct  {
-    SnapShotStore StorageDB
+type RaftFSMSnapshot struct {
+	SnapShotStore StorageDB
 }
 
 func (fsm *RaftFSM) Snapshot() (raft.FSMSnapshot, error) {
 	fsm.mu.Lock()
-    defer fsm.mu.Unlock()
-    ServerLogger.Println("Execute StorageFSM SnapShot")
-    return &RaftFSMSnapshot{
-        SnapShotStore: fsm.rs,
-    }, nil
+	defer fsm.mu.Unlock()
+	ServerLogger.Println("Execute StorageFSM SnapShot")
+	return &RaftFSMSnapshot{
+		SnapShotStore: fsm.rs,
+	}, nil
 }
 
 func (fsm *RaftFSM) Restore(irc io.ReadCloser) error {
@@ -76,11 +76,11 @@ func (fsm *RaftFSM) Restore(irc io.ReadCloser) error {
 }
 
 func (snap *RaftFSMSnapshot) Persist(sink raft.SnapshotSink) error {
-    return nil
+	return nil
 }
 
 func (snap *RaftFSMSnapshot) Release() {
-    return
+	return
 }
 
 // Get a value by bucketName and key

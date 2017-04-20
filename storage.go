@@ -48,10 +48,10 @@ func (rs *RaftStorage) GetUint64(key []byte) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
-    //Empty value
-    if valByte == nil {
-        return 0, nil
-    }
+	//Empty value
+	if valByte == nil {
+		return 0, nil
+	}
 	val, err := strconv.ParseUint(string(valByte), 10, 64)
 	if err != nil {
 		return 0, err
@@ -84,7 +84,7 @@ func (rs *RaftStorage) LastIndex() (uint64, error) {
 	if val == nil {
 		return 0, nil
 	}
-    return Btoi(val), nil
+	return Btoi(val), nil
 }
 
 // GetLog gets a log entry at a given index.
