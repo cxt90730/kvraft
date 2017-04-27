@@ -32,7 +32,7 @@ func (rc RpcCmd) DoGet() ([]byte, error) {
 }
 
 func (rc RpcCmd) DoSet() error {
-	rpcAddr := fmt.Sprintf("%s:%s", serverConfig.LeaderAddr, serverConfig.LeaderPort)
+	rpcAddr := fmt.Sprintf("%s:%s", serverConfig.LeaderRpcAddr, serverConfig.LeaderRpcPort)
 	opRequest := OpRequest{
 		Op:     rc.Op,
 		Bucket: string(rc.Bucket),

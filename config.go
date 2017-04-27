@@ -13,8 +13,9 @@ type ServerConfig struct {
 	RaftPort         string
 	RpcAddr          string
 	RpcPort          string
-	LeaderAddr       string
-	LeaderPort       string
+	LeaderRpcAddr    string
+	LeaderRpcPort    string
+    MemberBindPort   int
 	PeerStorage      string
 	Peers            []string
 	SnapshotStorage  string
@@ -22,6 +23,10 @@ type ServerConfig struct {
 	LogDir           string
 	EnableSingleNode bool
 	BucketName       string
+}
+
+func (sc *ServerConfig) ServerAddrString() string {
+	return fmt.Sprintf("%s:%s", sc.ServerAddr, sc.ServerPort)
 }
 
 func (sc *ServerConfig) RaftAddrString() string {
