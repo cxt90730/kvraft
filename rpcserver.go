@@ -39,9 +39,9 @@ func (rrs *RaftRpcService) OpRPC(ctx context.Context, r *OpRequest) (*OpReply, e
 	switch r.Op {
 	case CmdGet:
 		value, err = rrs.kvService.fsm.Get([]byte(r.Bucket), []byte(r.Key))
-    case CmdJoin:
-        future:= rrs.kvService.raft.AddPeer(string(r.Value))
-        err = future.Error()
+	case CmdJoin:
+		future := rrs.kvService.raft.AddPeer(string(r.Value))
+		err = future.Error()
 	//raft apply operation
 	default:
 		raftState := rrs.kvService.raft

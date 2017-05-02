@@ -150,9 +150,9 @@ func NewKVRaftService(config *KVRaftConfig) (*KVRaftService, error) {
 	}()
 	go shareConfig(kvService, SHARE_LEADER_INFO_TIMEOUT)
 
-    waitGroup := &sync.WaitGroup{}
-    waitGroup.Add(1)
-    go joinServerMember(kvService, waitGroup)
+	waitGroup := &sync.WaitGroup{}
+	waitGroup.Add(1)
+	go joinServerMember(kvService, waitGroup)
 
 	kvraftLogger.Println("waiting leader!")
 	for r.Leader() == "" || ShCache.LeaderRpcAddr == "" || ShCache.LeaderRpcPort == "" {
@@ -160,7 +160,7 @@ func NewKVRaftService(config *KVRaftConfig) (*KVRaftService, error) {
 	}
 	kvraftLogger.Println("Leader has elected! Raft:", r.Leader(), " Rpc:", ShCache.LeaderRpcAddr, ":", ShCache.LeaderRpcPort)
 
-    waitGroup.Wait()
+	waitGroup.Wait()
 	kvraftLogger.Println("kvraft service start!")
 
 	return kvService, nil
@@ -183,20 +183,20 @@ func joinServerMember(s *KVRaftService, waitGroup *sync.WaitGroup) {
 		s.log.Println("Join in member list success !")
 		break
 	}
-    waitGroup.Done()
+	waitGroup.Done()
 }
 
 func shareConfig(s *KVRaftService, timeout time.Duration) {
 	for {
 		//Get Leader, if leader is self , notify others
 		time.Sleep(timeout)
-        s.log.Println("shareConfig:", s.config.RaftAddrString(), s.raft.Leader())
+		s.log.Println("shareConfig:", s.config.RaftAddrString(), s.raft.Leader())
 		if s.config.RaftAddrString() == s.raft.Leader() {
-            s.log.Println("share:", s.config.MemberAddr, s.config.MemberPort)
+			s.log.Println("share:", s.config.MemberAddr, s.config.MemberPort)
 			// update leader address info
 			ShCache.LeaderRpcAddr, ShCache.LeaderRpcPort = s.config.RpcAddr, s.config.RpcPort
 			ShCache.LeaderMemberAddr, ShCache.LeaderMemberPort = s.config.MemberAddr, s.config.MemberPort
-            s.log.Println("share2:", ShCache.LeaderMemberAddr, ShCache.LeaderMemberPort)
+			s.log.Println("share2:", ShCache.LeaderMemberAddr, ShCache.LeaderMemberPort)
 			value, _ := json.Marshal(ShCache)
 			opReq := OpRequest{
 				Op:    CmdShare,
@@ -211,7 +211,7 @@ func shareConfig(s *KVRaftService, timeout time.Duration) {
 			}
 			s.log.Println("Share config apply success! ")
 		}
-        s.log.Println("sc:", ShCache.LeaderMemberAddr, ShCache.LeaderMemberPort)
+		s.log.Println("sc:", ShCache.LeaderMemberAddr, ShCache.LeaderMemberPort)
 		s.config.LeaderRpcAddr, s.config.LeaderRpcPort = ShCache.LeaderRpcAddr, ShCache.LeaderRpcPort
 	}
 }
@@ -239,13 +239,13 @@ func (s *KVRaftService) GetKVRaftState() (string, error) {
 	return statString, nil
 }
 
-func (s *KVRaftService) GetMemberList() []string  {
-    activeMembers := s.member.Members()
-    members := make([]string, len(activeMembers))
-    for i, member := range activeMembers {
-        members[i] = member.Address()
-    }
-    return members
+func (s *KVRaftService) GetMemberList() []string {
+	activeMembers := s.member.Members()
+	members := make([]string, len(activeMembers))
+	for i, member := range activeMembers {
+		members[i] = member.Address()
+	}
+	return members
 }
 
 func (s *KVRaftService) StopKVRaftService() error {
