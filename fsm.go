@@ -1,10 +1,11 @@
-package main
+package kvraft
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/hashicorp/raft"
 	"io"
+	"log"
 	"sync"
 )
 
@@ -17,14 +18,16 @@ var ErrInvalidCmd = fmt.Errorf("the command is invalid")
 // RaftFSM is an implementation of the FSM interfaces
 // It just store the key/value logs sequentially
 type RaftFSM struct {
-	mu *sync.Mutex
-	rs StorageDB
+	mu  *sync.Mutex
+	rs  StorageDB
+	log *log.Logger
 }
 
-func NewStorageFSM(rs StorageDB) *RaftFSM {
+func NewStorageFSM(rs StorageDB, logger *log.Logger) *RaftFSM {
 	return &RaftFSM{
-		mu: &sync.Mutex{},
-		rs: rs,
+		mu:  &sync.Mutex{},
+		rs:  rs,
+		log: logger,
 	}
 }
 
@@ -49,11 +52,13 @@ func (fsm *RaftFSM) Apply(log *raft.Log) interface{} {
 		err = fsm.rs.DeleteValue([]byte(req.Bucket), []byte(req.Key))
 	case CmdShare:
 		err = json.Unmarshal(req.Value, ShCache)
+	case CmdCreateBucket:
+		err = fsm.rs.CreateBucket([]byte(req.Bucket))
 	default:
 		err = ErrInvalidCmd
 	}
 	if err != nil {
-		ServerLogger.Println("FSM Apply Error: ", err)
+		fsm.log.Println("FSM Apply Error: ", err)
 	}
 	return err
 }
@@ -65,7 +70,7 @@ type RaftFSMSnapshot struct {
 func (fsm *RaftFSM) Snapshot() (raft.FSMSnapshot, error) {
 	fsm.mu.Lock()
 	defer fsm.mu.Unlock()
-	ServerLogger.Println("Execute StorageFSM SnapShot")
+	fsm.log.Println("Execute StorageFSM SnapShot")
 	return &RaftFSMSnapshot{
 		SnapShotStore: fsm.rs,
 	}, nil

@@ -1,4 +1,4 @@
-package main
+package kvraft
 
 import (
 	"fmt"
@@ -68,6 +68,6 @@ func LoggerWithWriter(out io.Writer, flag string, notlogged ...string) gin.Handl
 	}
 }
 
-func InitServerLog(out io.Writer, flag string) *log.Logger {
+func InitServerLogger(out io.Writer, flag string) *log.Logger {
 	return log.New(out, flag, log.LstdFlags)
 }

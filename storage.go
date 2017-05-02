@@ -1,4 +1,4 @@
-package main
+package kvraft
 
 import (
 	"encoding/json"
