@@ -13,6 +13,7 @@ type KVRaftConfig struct {
 	RpcPort          string
 	LeaderRpcAddr    string
 	LeaderRpcPort    string
+	MemberName       string // {ip}:{port}
 	MemberAddr       string
 	MemberPort       int
 	PeerStorage      string

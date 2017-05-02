@@ -125,7 +125,12 @@ func NewKVRaftService(config *KVRaftConfig) (*KVRaftService, error) {
 	mListConf.BindAddr = config.MemberAddr
 	mListConf.BindPort = config.MemberPort
 	mListConf.Logger = kvraftLogger
-	mListConf.Name = config.RpcAddrString()
+	if config.MemberName == "" {
+		mListConf.Name = config.RpcAddrString()
+	} else {
+		mListConf.Name = config.MemberName
+	}
+
 	memList, err := memberlist.Create(mListConf)
 	if err != nil {
 		return nil, err
