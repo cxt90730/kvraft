@@ -243,7 +243,7 @@ func (s *KVRaftService) GetMemberList() []string  {
     activeMembers := s.member.Members()
     members := make([]string, len(activeMembers))
     for i, member := range activeMembers {
-        members[i] = member
+        members[i] = member.Address()
     }
     return members
 }
