@@ -239,6 +239,15 @@ func (s *KVRaftService) GetKVRaftState() (string, error) {
 	return statString, nil
 }
 
+func (s *KVRaftService) GetMemberList() []string  {
+    activeMembers := s.member.Members()
+    members := make([]string, len(activeMembers))
+    for i, member := range activeMembers {
+        members[i] = member
+    }
+    return members
+}
+
 func (s *KVRaftService) StopKVRaftService() error {
 	future := s.raft.Shutdown()
 	if err := future.Error(); err != nil {
