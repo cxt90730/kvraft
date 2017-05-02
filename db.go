@@ -1,8 +1,10 @@
-package main
+package kvraft
 
 type StorageDB interface {
 	InitDB() error
-	SetValue(container, key, value []byte) error
-	GetValue(container, key []byte) ([]byte, error)
-	DeleteValue(container, key []byte) error
+	CreateBucket(bucketName []byte) error
+	SetValue(bucketName, key, value []byte) error
+	GetValue(bucketName, key []byte) ([]byte, error)
+	DeleteValue(bucketName, key []byte) error
+	Close() error
 }

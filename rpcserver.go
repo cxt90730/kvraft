@@ -1,4 +1,4 @@
-package main
+package kvraft
 
 import (
 	"encoding/json"
@@ -16,8 +16,8 @@ const (
 	RPC_STATUS_FAIL
 )
 
-func NewRPCServer(addr string) (*RaftRpcService, error) {
-	rpc := &RaftRpcService{}
+func NewRPCServer(addr string, kvService *KVRaftService) (*RaftRpcService, error) {
+	rpc := &RaftRpcService{kvService}
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,9 @@ func NewRPCServer(addr string) (*RaftRpcService, error) {
 	return rpc, grpcServer.Serve(listener)
 }
 
-type RaftRpcService struct{}
+type RaftRpcService struct {
+	kvService *KVRaftService
+}
 
 //Handler rpc request
 func (rrs *RaftRpcService) OpRPC(ctx context.Context, r *OpRequest) (*OpReply, error) {
@@ -36,10 +38,13 @@ func (rrs *RaftRpcService) OpRPC(ctx context.Context, r *OpRequest) (*OpReply, e
 	var value []byte
 	switch r.Op {
 	case CmdGet:
-		value, err = localServer.FSM.Get([]byte(r.Bucket), []byte(r.Key))
-	//CmdSet
+		value, err = rrs.kvService.fsm.Get([]byte(r.Bucket), []byte(r.Key))
+	case CmdJoin:
+		future := rrs.kvService.raft.AddPeer(string(r.Value))
+		err = future.Error()
+	//raft apply operation
 	default:
-		raftState := localServer.Raft
+		raftState := rrs.kvService.raft
 		reqCmd, _ := json.Marshal(r)
 		err = raftState.Apply(reqCmd, time.Second).Error()
 	}

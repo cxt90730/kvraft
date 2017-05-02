@@ -1,16 +1,13 @@
 # kvraft
 
-kvraft is a key/value system that I want to implement.
-It bases on Raft algorithm, uses Boltdb, gRPC and a web framework "gin"
+kvraft is a key/value service based on hashicorp/raft.
+It uses Boltdb for storage, gRPC for cluster communication.
 
 ## Install
 
 - install
 ```sh
-   go get -u github.com/hashicorp/raft
-   go get -u github.com/boltdb/bolt
-   go get -u github.com/gin-gonic/gin
-   go get -u google.golang.org/grpc
+   go get -u github.com/cxt90730/kvraft
    go get -a github.com/golang/protobuf/protoc-gen-go
 ```
 
@@ -32,9 +29,43 @@ It bases on Raft algorithm, uses Boltdb, gRPC and a web framework "gin"
    ./kvraft -c ./conf/kvraft.conf
 ```
 
-- start cluster
+## Example
 ```
-   sh test.sh
-```
+	conf, err := NewKVRaftConfig("./conf/kvraft_single.conf")
+	if err != nil {
+		t.Fatal(err.Error())
+		return
+	}
 
+	s, err := NewKVRaftService(conf)
+	if err != nil {
+		t.Fatal(err.Error())
+		return
+	}
+
+	bucketName := []byte("haha")
+	err = s.CreateBucket(bucketName)
+	if err != nil {
+		t.Fatal(err.Error())
+		return
+	}
+
+	err = s.SetValue(bucketName, []byte("hehe"), []byte("fuck"))
+	if err != nil {
+		t.Fatal(err.Error())
+		return
+	}
+
+	v, err := s.GetValue(bucketName, []byte("hehe"))
+	if err != nil {
+		t.Fatal(err.Error())
+		return
+	}
+
+	err = s.StopKVRaftService()
+	if err != nil {
+		t.Fatal(err.Error())
+		return
+	}
+```
 

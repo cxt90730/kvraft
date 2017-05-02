@@ -1,4 +1,4 @@
-package main
+package kvraft
 
 import (
 	"fmt"
@@ -20,23 +20,17 @@ func (rdb *RaftDB) NewRaftDB() error {
 	if err != nil {
 		return err
 	}
-	err = rdb.createBucket(LOG_STORE_BUCKET)
+	err = rdb.CreateBucket(LOG_STORE_BUCKET)
 	if err != nil {
 		return err
 	}
-	err = rdb.createBucket(STABLE_STORE_BUCKET)
+	err = rdb.CreateBucket(STABLE_STORE_BUCKET)
 	if err != nil {
 		return err
 	}
-	err = rdb.createBucket(STABLE_STORE_UINT64_BUCKET)
+	err = rdb.CreateBucket(STABLE_STORE_UINT64_BUCKET)
 	if err != nil {
 		return err
-	}
-	if len(serverConfig.BucketName) != 0 {
-		err = rdb.createBucket([]byte(serverConfig.BucketName))
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
@@ -51,7 +45,11 @@ func (rdb *RaftDB) InitDB() error {
 	return nil
 }
 
-func (rdb *RaftDB) createBucket(bucketName []byte) error {
+func (rdb *RaftDB) CreateBucket(bucketName []byte) error {
+	return createBucket(rdb, bucketName)
+}
+
+func createBucket(rdb *RaftDB, bucketName []byte) error {
 	err := rdb.Db.Update(func(tx *bolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists(bucketName)
 		if err != nil {
@@ -62,7 +60,6 @@ func (rdb *RaftDB) createBucket(bucketName []byte) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -120,4 +117,8 @@ func (rdb *RaftDB) GetValue(bucketName, key []byte) ([]byte, error) {
 		return nil
 	})
 	return value, err
+}
+
+func (rdb *RaftDB) Close() error {
+	return rdb.Db.Close()
 }

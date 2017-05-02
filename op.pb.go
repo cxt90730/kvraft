@@ -12,7 +12,7 @@ It has these top-level messages:
 	OpRequest
 	OpReply
 */
-package main
+package kvraft
 
 import (
 	"fmt"

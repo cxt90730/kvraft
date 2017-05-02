@@ -1,4 +1,4 @@
-package main
+package kvraft
 
 import (
 	"golang.org/x/net/context"
@@ -16,7 +16,7 @@ type RpcClient struct {
 
 var rrc *RpcClient
 
-func NewRpcClient() *RpcClient {
+func newRpcClient() *RpcClient {
 	if rrc == nil {
 		rrc = &RpcClient{
 			mu:   &sync.Mutex{},
@@ -32,7 +32,6 @@ func (rrc *RpcClient) RPCRequest(rpcAddr string, r *OpRequest) (*OpReply, error)
 	conn := rrc.conn[rpcAddr]
 	if conn == nil {
 		//Create New Connection
-		ServerLogger.Println("New RPC Connect, rpc server addr:", rpcAddr)
 		rrc.mu.Unlock()
 		conn, err = grpc.Dial(rpcAddr, grpc.WithInsecure())
 		if err != nil {

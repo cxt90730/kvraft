@@ -1,4 +1,4 @@
-package main
+package kvraft
 
 import (
 	"encoding/json"
@@ -6,51 +6,46 @@ import (
 	"os"
 )
 
-type ServerConfig struct {
-	ServerAddr       string
-	ServerPort       string
+type KVRaftConfig struct {
 	RaftAddr         string
 	RaftPort         string
 	RpcAddr          string
 	RpcPort          string
 	LeaderRpcAddr    string
 	LeaderRpcPort    string
-    MemberBindPort   int
+	MemberAddr       string
+	MemberPort       int
 	PeerStorage      string
 	Peers            []string
 	SnapshotStorage  string
-	DbPath           string
-	LogDir           string
+	DbDir            string
 	EnableSingleNode bool
+	RaftLogDir       string
 	BucketName       string
 }
 
-func (sc *ServerConfig) ServerAddrString() string {
-	return fmt.Sprintf("%s:%s", sc.ServerAddr, sc.ServerPort)
+func (rc *KVRaftConfig) RaftAddrString() string {
+	return fmt.Sprintf("%s:%s", rc.RaftAddr, rc.RaftPort)
 }
 
-func (sc *ServerConfig) RaftAddrString() string {
-	return fmt.Sprintf("%s:%s", sc.RaftAddr, sc.RaftPort)
+func (rc *KVRaftConfig) RpcAddrString() string {
+	return fmt.Sprintf("%s:%s", rc.RpcAddr, rc.RpcPort)
 }
 
-func (sc *ServerConfig) RpcAddrString() string {
-	return fmt.Sprintf("%s:%s", sc.RpcAddr, sc.RpcPort)
+func (rc *KVRaftConfig) MemberAddrString() string {
+	return fmt.Sprintf("%s:%s", rc.MemberAddr, rc.MemberPort)
 }
 
-//Conf content must be formatted by json
-
-var serverConfig *ServerConfig
-
-func NewServerConfig(confPath string) (*ServerConfig, error) {
-	serverConfig = &ServerConfig{}
+func NewKVRaftConfig(confPath string) (*KVRaftConfig, error) {
+	kvraftConfig := &KVRaftConfig{}
 	cFile, err := os.Open(confPath)
 	if err != nil {
 		return nil, err
 	}
 	defer cFile.Close()
-	err = json.NewDecoder(cFile).Decode(serverConfig)
+	err = json.NewDecoder(cFile).Decode(kvraftConfig)
 	if err != nil {
 		return nil, err
 	}
-	return serverConfig, nil
+	return kvraftConfig, nil
 }
