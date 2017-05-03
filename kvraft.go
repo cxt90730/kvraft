@@ -235,7 +235,7 @@ func (s *KVRaftService) GetKVRaftState() (string, error) {
 	activeMembers := s.member.Members()
 	statString += fmt.Sprintf("ActiveMembers: \n")
 	for _, member := range activeMembers {
-		statString += fmt.Sprintf("%s ; ", member.Address())
+		statString += fmt.Sprintf("%s ; ", member.String())
 	}
 	statString += fmt.Sprintf("\n")
 	for k, v := range statMap {
@@ -248,7 +248,7 @@ func (s *KVRaftService) GetMemberList() []string {
 	activeMembers := s.member.Members()
 	members := make([]string, len(activeMembers))
 	for i, member := range activeMembers {
-		members[i] = member.Address()
+		members[i] = member.String()
 	}
 	return members
 }
