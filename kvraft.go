@@ -195,13 +195,10 @@ func shareConfig(s *KVRaftService, timeout time.Duration) {
 	for {
 		//Get Leader, if leader is self , notify others
 		time.Sleep(timeout)
-		s.log.Println("shareConfig:", s.config.RaftAddrString(), s.raft.Leader())
 		if s.config.RaftAddrString() == s.raft.Leader() {
-			s.log.Println("share:", s.config.MemberAddr, s.config.MemberPort)
 			// update leader address info
 			ShCache.LeaderRpcAddr, ShCache.LeaderRpcPort = s.config.RpcAddr, s.config.RpcPort
 			ShCache.LeaderMemberAddr, ShCache.LeaderMemberPort = s.config.MemberAddr, s.config.MemberPort
-			s.log.Println("share2:", ShCache.LeaderMemberAddr, ShCache.LeaderMemberPort)
 			value, _ := json.Marshal(ShCache)
 			opReq := OpRequest{
 				Op:    CmdShare,
@@ -216,7 +213,6 @@ func shareConfig(s *KVRaftService, timeout time.Duration) {
 			}
 			s.log.Println("Share config apply success! ")
 		}
-		s.log.Println("sc:", ShCache.LeaderMemberAddr, ShCache.LeaderMemberPort)
 		s.config.LeaderRpcAddr, s.config.LeaderRpcPort = ShCache.LeaderRpcAddr, ShCache.LeaderRpcPort
 	}
 }

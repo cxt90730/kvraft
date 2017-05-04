@@ -65,6 +65,14 @@ func (fsm *RaftFSM) Apply(log *raft.Log) interface{} {
 
 type RaftFSMSnapshot struct {
 	SnapShotStore StorageDB
+	Log           *log.Logger
+}
+
+type SnapShotIterm struct {
+	Err    error
+	Bucket []byte
+	Key    []byte
+	Value  []byte
 }
 
 func (fsm *RaftFSM) Snapshot() (raft.FSMSnapshot, error) {
@@ -73,6 +81,7 @@ func (fsm *RaftFSM) Snapshot() (raft.FSMSnapshot, error) {
 	fsm.log.Println("Execute StorageFSM SnapShot")
 	return &RaftFSMSnapshot{
 		SnapShotStore: fsm.rs,
+		Log:           fsm.log,
 	}, nil
 }
 
