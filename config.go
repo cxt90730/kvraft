@@ -23,6 +23,7 @@ type KVRaftConfig struct {
 	EnableSingleNode bool
 	RaftLogDir       string
 	BucketName       string
+	Durable          bool
 }
 
 func (rc *KVRaftConfig) RaftAddrString() string {

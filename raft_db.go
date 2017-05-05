@@ -7,42 +7,49 @@ import (
 )
 
 type RaftDB struct {
-	DbPath string
-	Db     *bolt.DB
+	Db *bolt.DB
 }
 
-func (rdb *RaftDB) NewRaftDB() error {
-	//Remove old db
-	if err := os.RemoveAll(rdb.DbPath); err != nil {
-		return err
-	}
-	err := rdb.InitDB()
-	if err != nil {
-		return err
-	}
-	err = rdb.CreateBucket(LOG_STORE_BUCKET)
-	if err != nil {
-		return err
-	}
-	err = rdb.CreateBucket(STABLE_STORE_BUCKET)
-	if err != nil {
-		return err
-	}
-	err = rdb.CreateBucket(STABLE_STORE_UINT64_BUCKET)
-	if err != nil {
-		return err
+const DB_MODE = 0666
+
+func NewRaftDB(DbPath string, Durable bool) (*RaftDB, error) {
+	//Remove old db if not durable
+	if !Durable {
+		if err := os.RemoveAll(DbPath); err != nil {
+			return nil, err
+		}
 	}
 
-	return nil
+	db, err := bolt.Open(DbPath, DB_MODE, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	rdb := &RaftDB{db}
+	err = rdb.initialRaftStore()
+	if err != nil {
+		rdb.Close()
+		return nil, err
+	}
+
+	return rdb, nil
 }
 
-func (rdb *RaftDB) InitDB() error {
-	db, err := bolt.Open(rdb.DbPath, 0666, nil)
+func (rdb *RaftDB) initialRaftStore() error {
+	tx, err := rdb.Db.Begin(true)
 	if err != nil {
 		return err
 	}
-	rdb.Db = db
-	return nil
+	defer tx.Rollback()
+
+	//Initial bucket of raft store
+	if _, err = tx.CreateBucketIfNotExists(LOG_STORE_BUCKET); err != nil {
+		return err
+	}
+	if _, err = tx.CreateBucketIfNotExists(STABLE_STORE_BUCKET); err != nil {
+		return err
+	}
+	return tx.Commit()
 }
 
 func (rdb *RaftDB) CreateBucket(bucketName []byte) error {
@@ -117,6 +124,30 @@ func (rdb *RaftDB) GetValue(bucketName, key []byte) ([]byte, error) {
 		return nil
 	})
 	return value, err
+}
+
+func (rdb *RaftDB) GetFirst(bucketName []byte) ([]byte, []byte, error) {
+	tx, err := rdb.Db.Begin(false)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer tx.Rollback()
+
+	curs := tx.Bucket(bucketName).Cursor()
+	k, v := curs.First()
+	return k, v, nil
+}
+
+func (rdb *RaftDB) GetLast(bucketName []byte) ([]byte, []byte, error) {
+	tx, err := rdb.Db.Begin(false)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer tx.Rollback()
+
+	curs := tx.Bucket(bucketName).Cursor()
+	k, v := curs.Last()
+	return k, v, nil
 }
 
 func (rdb *RaftDB) Close() error {

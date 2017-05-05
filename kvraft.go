@@ -84,8 +84,7 @@ func NewKVRaftService(config *KVRaftConfig) (*KVRaftService, error) {
 
 	dbPath := dbDir + DB_NAME
 	//RaftDb implements boltDb
-	raftDB := &RaftDB{DbPath: dbPath}
-	err = raftDB.NewRaftDB()
+	raftDB, err := NewRaftDB(dbPath, config.Durable)
 	if err != nil {
 		return nil, err
 	}
